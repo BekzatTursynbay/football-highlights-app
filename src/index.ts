@@ -94,6 +94,18 @@ async function run() {
     (h) =>
       `• <a href="${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
   );
+
+  // Log clickable links in terminal
+  if (playable.length) {
+    console.log("\nHighlight links:");
+    playable.forEach((h) => {
+      const url = `${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}`;
+      console.log(url);
+    });
+  } else {
+    console.log("No highlights found for yesterday night.");
+  }
+
   const message = links.length
     ? `⚽️ Football Highlights:\n\n${links.join("\n")}`
     : "No highlights found for yesterday night.";
