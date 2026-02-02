@@ -89,15 +89,10 @@ async function run() {
 
   // console.log("Playable highlights:", playable);
 
-  // // Print links
-  // playable.forEach((h) => {
-  //   const url = `http://localhost:3000/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}`;
-  //   console.log(url);
-  // });
-
+  const BASE_URL = process.env.BASE_URL;
   const links = playable.map(
     (h) =>
-      `• <a href="http://localhost:3000/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
+      `• <a href="${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
   );
   const message = links.length
     ? `⚽️ Football Highlights:\n\n${links.join("\n")}`
