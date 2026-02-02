@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Match Highlight</title>
+    <style>
+      body {
+        margin: 0;
+        background: #754040;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      .video-wrapper {
+        position: relative;
+        width: 80vw;
+        max-width: 1000px;
+        aspect-ratio: 16 / 9;
+        background: black;
+        overflow: hidden;
+      }
+
+      /* Cropped iframe */
+      iframe {
+        position: absolute;
+        top: -50px;
+        left: 0;
+        width: 100%;
+        height: calc(100% + 50px);
+        border: none;
+      }
+
+      .video-wrapper.fullscreen {
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        aspect-ratio: auto;
+        z-index: 9999;
+      }
+
+      .video-wrapper.fullscreen iframe {
+        top: -50px;
+        height: calc(100% + 50px);
+      }
+      #fs-btn {
+        position: absolute;
+        bottom: 10px;
+        right: 0px;
+        z-index: 100;
+        background: rgb(0, 0, 0);
+        color: white;
+        padding: 1px 15px;
+        cursor: pointer;
+        font-size: 20px;
+        border: none;
+      }
+      /* 🔥 BLUR OVERLAY */
+      #pause-blur {
+        position: absolute;
+        bottom: 60px;
+        left: 0;
+        width: 100%;
+        height: 150px;
+        backdrop-filter: blur(14px);
+        background: rgba(225, 220, 220, 0.35);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        z-index: 50;
+      }
+
+      #pause-blur.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      @media (max-width: 1023px) {
+        #pause-blur {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="video-wrapper">
+      <div id="player"></div>
+      <button id="fs-btn" title="Fullscreen">⛶</button>
+      <div id="pause-blur"></div>
+    </div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="watch.js"></script>
+  </body>
+</html>
