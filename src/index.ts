@@ -10,6 +10,8 @@ import { fetchVideoDetails } from "./services/youtube";
 import { isPlayableInIframe } from "./utils/playability";
 import { sendTelegramMessage } from "./utils/telegram";
 
+console.log("CRON STARTED", new Date().toISOString());
+
 function normalizeVideo(
   league: string,
   video: any,
