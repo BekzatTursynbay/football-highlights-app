@@ -16,22 +16,7 @@ export async function fetchPlaylistVideos(playlistId: string) {
     params: {
       part: "snippet",
       maxResults: 50,
-      playlistId,
-      key: YOUTUBE_API_KEY,
-    },
-  });
-
-  return response.data.items;
-}
-
-export async function fetchChannelVideos(channelId: string) {
-  const response = await axios.get(`${YT_BASE}/search`, {
-    params: {
-      part: "snippet",
-      channelId,
-      maxResults: 25,
-      order: "date",
-      type: "video",
+      playlistId: playlistId,
       key: YOUTUBE_API_KEY,
     },
   });

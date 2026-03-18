@@ -1,12 +1,12 @@
 import "dotenv/config";
 import "./server";
+import cron from "node-cron";
 import { LEAGUES } from "./config/leagues";
-import { fetchChannelVideos, fetchPlaylistVideos } from "./services/youtube";
+import { fetchPlaylistVideos, fetchVideoDetails } from "./services/youtube";
 import { getNightTimeWindow } from "./utils/timeWindow";
 import { Highlight } from "./types/highlight";
 import { cleanTitle } from "./utils/titleCleaner";
 import { isValidHighlight } from "./utils/filters";
-import { fetchVideoDetails } from "./services/youtube";
 import { isPlayableInIframe } from "./utils/playability";
 import { sendTelegramMessage } from "./utils/telegram";
 
@@ -15,14 +15,14 @@ console.log("CRON STARTED", new Date().toISOString());
 function normalizeVideo(
   league: string,
   video: any,
-  sourceType: "playlist" | "channel",
   skipSeconds: number,
 ): Highlight | null {
   const snippet = video.snippet;
   let title = snippet.title;
 
-  // EPL filter: only Обзор videos
-  if ((league === "EPL" || league === "LaLiga") && !isValidHighlight(title)) {
+  // Only filter by 'Обзор' for EPL, LaLiga, Bundesliga, SerieA
+  const leaguesWithObzor = ["EPL", "LaLiga", "Bundesliga", "SerieA"];
+  if (leaguesWithObzor.includes(league) && !isValidHighlight(title)) {
     return null;
   }
 
@@ -30,11 +30,9 @@ function normalizeVideo(
 
   return {
     league: league as any,
-    videoId:
-      sourceType === "playlist" ? snippet.resourceId.videoId : video.id.videoId,
+    videoId: snippet.resourceId.videoId,
     title,
     publishedAt: new Date(snippet.publishedAt),
-    sourceType,
     skipSeconds,
   };
 }
@@ -49,19 +47,11 @@ async function run() {
   let highlights: Highlight[] = [];
 
   for (const league of LEAGUES) {
-    let videos: any[] = [];
+    const videos = await fetchPlaylistVideos(league.playlistId);
 
-    if (league.sourceType === "playlist") {
-      videos = await fetchPlaylistVideos(league.id);
-    } else {
-      videos = await fetchChannelVideos(league.id);
-    }
-
-    const normalized = videos
-      .map((v) =>
-        normalizeVideo(league.league, v, league.sourceType, league.skipSeconds),
-      )
-      .filter((h): h is Highlight => h !== null);
+    const normalized = (videos as any[])
+      .map((v: any) => normalizeVideo(league.league, v, league.skipSeconds))
+      .filter((h: Highlight | null): h is Highlight => h !== null);
 
     highlights = highlights.concat(normalized);
   }
@@ -88,8 +78,6 @@ async function run() {
     const detail = detailsMap.get(h.videoId);
     return detail && isPlayableInIframe(detail, "KZ");
   });
-
-  // console.log("Playable highlights:", playable);
 
   const BASE_URL = process.env.BASE_URL;
   const links = playable.map(
@@ -120,4 +108,7 @@ async function run() {
   console.log(nightStart, nightEnd);
 }
 
-run().catch(console.error);
+// Schedule the highlight sending at 8:00 AM every day
+cron.schedule("0 8 * * *", () => {
+  run().catch(console.error);
+});

@@ -2,35 +2,44 @@ import { League } from "../types/highlight";
 
 export interface LeagueConfig {
   league: League;
-  sourceType: "playlist" | "channel";
-  id: string;
+  playlistId: string;
   skipSeconds: number;
 }
 
 export const LEAGUES: LeagueConfig[] = [
   {
     league: "EPL",
-    sourceType: "channel",
-    id: "UCBFe_1BsDBtUhf1vkp0z5Bg",
-    skipSeconds: 7,
+    playlistId: "PLoyLwQOxE_3VyOEC4hjYCeH_xask8Ax-r",
+    skipSeconds: 0,
   },
   {
     league: "SuperLig",
-    sourceType: "playlist",
-    id: "PLREq_OnJpFaRT2WY8UTDz-Bbty-BQIMmj",
+    playlistId: "PLREq_OnJpFaRT2WY8UTDz-Bbty-BQIMmj",
     skipSeconds: 7,
   },
   {
     league: "LaLiga",
-    sourceType: "playlist",
-    // id: "PLKj1QUtwqLN9abWyEey7ZJOhBQcos029x",
-    id: "PLqwe009vcafAgzfc4Zkcdr7w4HHefNugF",
-    skipSeconds: 8,
+    playlistId: "PLqwe009vcafAgzfc4Zkcdr7w4HHefNugF",
+    skipSeconds: 0,
   },
   {
     league: "ChampionsLeague",
-    sourceType: "playlist",
-    id: "PLywDagwpnS3I86qfv0Luuj4PeFX3JRTQt",
+    playlistId: "PLywDagwpnS3I86qfv0Luuj4PeFX3JRTQt",
+    skipSeconds: 0,
+  },
+  {
+    league: "EuropaLeague",
+    playlistId: "PLywDagwpnS3JM0idPWdoOp5n4WVtlsHKM",
+    skipSeconds: 0,
+  },
+  {
+    league: "SerieA",
+    playlistId: "PLqwe009vcafDW5cq2yzwciJHtBNDbonum",
+    skipSeconds: 0,
+  },
+  {
+    league: "Bundesliga",
+    playlistId: "PLqwe009vcafD9qJ_DQS5D2qWC7ET_-yCI",
     skipSeconds: 0,
   },
 ];
