@@ -20,6 +20,11 @@ const wrapper = document.getElementById("videoWrapper")!;
 let isPaused = false;
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
+// Track time to detect interaction
+let lastTime = 0;
+let interactionTimer: ReturnType<typeof setInterval> | null = null;
+
+// --- Blur control ---
 function showBlur(): void {
   if (hideTimer) {
     clearTimeout(hideTimer);
@@ -28,25 +33,32 @@ function showBlur(): void {
   overlay.classList.add("visible");
 }
 
-// Delay hiding to outlast YouTube's 3-second UI fade (3.5s to be safe).
 function scheduleHide(): void {
-  if (isPaused) return; // keep blur while paused
+  if (isPaused) return;
   if (hideTimer) clearTimeout(hideTimer);
+
   hideTimer = setTimeout(() => {
     overlay.classList.remove("visible");
     hideTimer = null;
-  }, 3000);
+  }, 3500);
 }
 
-// Desktop hover
+// --- Desktop hover (still useful) ---
 wrapper.addEventListener("mouseenter", showBlur);
 wrapper.addEventListener("mouseleave", scheduleHide);
 
-// Mobile touch
-wrapper.addEventListener("touchstart", showBlur, { passive: true });
-wrapper.addEventListener("touchend", scheduleHide, { passive: true });
-wrapper.addEventListener("touchcancel", scheduleHide, { passive: true });
+// --- Detect tap inside iframe on mobile ---
+window.addEventListener("blur", () => {
+  if (document.activeElement?.tagName === "IFRAME") {
+    console.log("clicked");
+    showBlur();
+    scheduleHide();
+    // Refocus window so the next tap triggers blur again
+    setTimeout(() => (document.activeElement as HTMLElement)?.blur(), 0);
+  }
+});
 
+// --- YouTube API ---
 (window as any).onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
     videoId,
@@ -57,7 +69,7 @@ wrapper.addEventListener("touchcancel", scheduleHide, { passive: true });
       controls: 1,
       rel: 0,
       modestbranding: 1,
-      playsinline: 1, // 👈 important esp. on mobile
+      playsinline: 1,
     },
     events: {
       onReady: onPlayerReady,
@@ -67,22 +79,35 @@ wrapper.addEventListener("touchcancel", scheduleHide, { passive: true });
 };
 
 function onPlayerReady(event: YT.PlayerEvent) {
-  console.log("PLAYER READY");
   event.target.playVideo();
+
+  // Start polling for interaction
+  interactionTimer = setInterval(() => {
+    if (!player || !player.getCurrentTime) return;
+
+    const currentTime = player.getCurrentTime();
+
+    // Detect seek/jump interaction (not normal playback advancement)
+    if (Math.abs(currentTime - lastTime) > 2) {
+      showBlur();
+      scheduleHide();
+    }
+
+    lastTime = currentTime;
+  }, 500); // check twice per second
 }
 
+// --- Player state ---
 function onPlayerStateChange(event: YT.OnStateChangeEvent): void {
   if (
     event.data === YT.PlayerState.PAUSED ||
     event.data === YT.PlayerState.ENDED
   ) {
     isPaused = true;
-    showBlur(); // ensure blur is visible while paused
+    showBlur();
   } else if (event.data === YT.PlayerState.PLAYING) {
     isPaused = false;
-    // Hide only if mouse is not currently over the wrapper
-    if (!wrapper.matches(":hover")) {
-      scheduleHide();
-    }
+    showBlur();
+    scheduleHide();
   }
 }
