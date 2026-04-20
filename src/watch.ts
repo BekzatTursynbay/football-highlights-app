@@ -13,7 +13,8 @@ if (!videoId) {
 
 let player: YT.Player;
 
-const overlay = document.getElementById("blurOverlay")!;
+const overlay = document.getElementById("blurOverlayTop")!;
+const overlayBottom = document.getElementById("blurOverlayBottom")!;
 const wrapper = document.getElementById("videoWrapper")!;
 
 // State
@@ -31,6 +32,7 @@ function showBlur(): void {
     hideTimer = null;
   }
   overlay.classList.add("visible");
+  overlayBottom.classList.add("visible");
 }
 
 function scheduleHide(): void {
@@ -39,6 +41,7 @@ function scheduleHide(): void {
 
   hideTimer = setTimeout(() => {
     overlay.classList.remove("visible");
+    overlayBottom.classList.remove("visible");
     hideTimer = null;
   }, 3500);
 }

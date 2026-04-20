@@ -10,7 +10,8 @@ if (!videoId) {
     throw new Error("Missing videoId");
 }
 let player;
-const overlay = document.getElementById("blurOverlay");
+const overlay = document.getElementById("blurOverlayTop");
+const overlayBottom = document.getElementById("blurOverlayBottom");
 const wrapper = document.getElementById("videoWrapper");
 // State
 let isPaused = false;
@@ -25,6 +26,7 @@ function showBlur() {
         hideTimer = null;
     }
     overlay.classList.add("visible");
+    overlayBottom.classList.add("visible");
 }
 function scheduleHide() {
     if (isPaused)
@@ -33,6 +35,7 @@ function scheduleHide() {
         clearTimeout(hideTimer);
     hideTimer = setTimeout(() => {
         overlay.classList.remove("visible");
+        overlayBottom.classList.remove("visible");
         hideTimer = null;
     }, 3500);
 }
