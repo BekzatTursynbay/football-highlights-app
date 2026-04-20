@@ -109,6 +109,6 @@ async function run() {
 }
 
 // Schedule the highlight sending at 14:20 KZ = 09:20 UTC
-cron.schedule("05 10 * * *", () => {
+cron.schedule("13 10 * * *", () => {
   run().catch(console.error);
 });
