@@ -13,6 +13,40 @@ if (!videoId) {
 
 let player: YT.Player;
 
+const overlay = document.getElementById("blurOverlay")!;
+const wrapper = document.getElementById("videoWrapper")!;
+
+// State
+let isPaused = false;
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showBlur(): void {
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+  overlay.classList.add("visible");
+}
+
+// Delay hiding to outlast YouTube's 3-second UI fade (3.5s to be safe).
+function scheduleHide(): void {
+  if (isPaused) return; // keep blur while paused
+  if (hideTimer) clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    overlay.classList.remove("visible");
+    hideTimer = null;
+  }, 3000);
+}
+
+// Desktop hover
+wrapper.addEventListener("mouseenter", showBlur);
+wrapper.addEventListener("mouseleave", scheduleHide);
+
+// Mobile touch
+wrapper.addEventListener("touchstart", showBlur, { passive: true });
+wrapper.addEventListener("touchend", scheduleHide, { passive: true });
+wrapper.addEventListener("touchcancel", scheduleHide, { passive: true });
+
 (window as any).onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
     videoId,
@@ -37,4 +71,18 @@ function onPlayerReady(event: YT.PlayerEvent) {
   event.target.playVideo();
 }
 
-function onPlayerStateChange(_event: YT.OnStateChangeEvent) {}
+function onPlayerStateChange(event: YT.OnStateChangeEvent): void {
+  if (
+    event.data === YT.PlayerState.PAUSED ||
+    event.data === YT.PlayerState.ENDED
+  ) {
+    isPaused = true;
+    showBlur(); // ensure blur is visible while paused
+  } else if (event.data === YT.PlayerState.PLAYING) {
+    isPaused = false;
+    // Hide only if mouse is not currently over the wrapper
+    if (!wrapper.matches(":hover")) {
+      scheduleHide();
+    }
+  }
+}

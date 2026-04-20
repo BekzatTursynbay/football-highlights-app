@@ -33,10 +33,37 @@
         height: 100%;
         border: none;
       }
+
+      /* Blur overlay: top-left 50% width */
+      .blur-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 50%;
+        height: 20%;
+        z-index: 10;
+        pointer-events: none;
+        background: rgba(0, 0, 0, 0.45);
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .blur-overlay.visible {
+        opacity: 1;
+      }
+
+      @media (max-width: 600px) {
+        .blur-overlay {
+          height: 15%;
+        }
+      }
     </style>
   </head>
   <body>
-    <div class="video-wrapper">
+    <div class="video-wrapper" id="videoWrapper">
+      <div class="blur-overlay" id="blurOverlay"></div>
       <div id="player"></div>
     </div>
 
