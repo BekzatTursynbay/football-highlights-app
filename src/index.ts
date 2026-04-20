@@ -108,7 +108,7 @@ async function run() {
   console.log(nightStart, nightEnd);
 }
 
-// Schedule the highlight sending at 8:00 AM every day
-cron.schedule("0 8 * * *", () => {
+// Schedule the highlight sending at 14:20 KZ = 09:20 UTC
+cron.schedule("20 09 * * *", () => {
   run().catch(console.error);
 });
