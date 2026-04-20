@@ -37,25 +37,4 @@ function onPlayerReady(event: YT.PlayerEvent) {
   event.target.playVideo();
 }
 
-function onPlayerStateChange(event: YT.OnStateChangeEvent) {
-  const blur = document.getElementById("pause-blur");
-  if (!blur) return;
-
-  if (event.data === YT.PlayerState.PAUSED) {
-    blur.classList.add("active");
-  }
-
-  if (event.data === YT.PlayerState.PLAYING) {
-    blur.classList.remove("active");
-  }
-}
-
-// FULLSCREEN BUTTON
-const wrapper = document.querySelector(".video-wrapper") as HTMLElement;
-const fsBtn = document.getElementById("fs-btn") as HTMLButtonElement;
-
-if (wrapper && fsBtn) {
-  fsBtn.addEventListener("click", () => {
-    wrapper.classList.toggle("fullscreen");
-  });
-}
+function onPlayerStateChange(_event: YT.OnStateChangeEvent) {}
