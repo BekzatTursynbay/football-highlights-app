@@ -14,7 +14,9 @@ if (!videoId) {
 let player: YT.Player;
 
 const overlay = document.getElementById("blurOverlayTop")!;
-const overlayBottom = document.getElementById("blurOverlayBottom")!;
+const overlayBottom = document.getElementById(
+  "blurOverlayBottom",
+) as HTMLElement | null;
 const wrapper = document.getElementById("videoWrapper")!;
 
 let isPaused = false;
@@ -22,6 +24,11 @@ let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 let lastTime = 0;
 let interactionTimer: ReturnType<typeof setInterval> | null = null;
+
+// --- device check ---
+function isAndroid(): boolean {
+  return /Android/i.test(navigator.userAgent);
+}
 
 // --- Blur control ---
 function showBlur(): void {
@@ -31,7 +38,10 @@ function showBlur(): void {
   }
 
   overlay.classList.add("visible");
-  overlayBottom.classList.add("visible");
+
+  if (isAndroid() && overlayBottom) {
+    overlayBottom.classList.add("visible");
+  }
 }
 
 function scheduleHide(): void {
@@ -41,7 +51,11 @@ function scheduleHide(): void {
 
   hideTimer = setTimeout(() => {
     overlay.classList.remove("visible");
-    overlayBottom.classList.remove("visible");
+
+    if (isAndroid() && overlayBottom) {
+      overlayBottom.classList.remove("visible");
+    }
+
     hideTimer = null;
   }, 3500);
 }
@@ -86,7 +100,7 @@ function onPlayerReady(event: YT.PlayerEvent) {
   event.target.playVideo();
 
   interactionTimer = setInterval(() => {
-    if (!player || !player.getCurrentTime) return;
+    if (!player?.getCurrentTime) return;
 
     const currentTime = player.getCurrentTime();
 

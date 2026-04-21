@@ -44,7 +44,6 @@
         position: absolute;
         z-index: 10;
         pointer-events: all;
-        -webkit-user-select: none;
         user-select: none;
         background: rgba(0, 0, 0, 0.45);
         -webkit-backdrop-filter: blur(10px);
@@ -64,12 +63,12 @@
         height: 20%;
       }
 
-      /* .blur-overlay-bottom {
+      .blur-overlay-bottom {
         bottom: 0;
         right: 0;
         width: 40%;
         height: 40%;
-      } */
+      }
 
       @media (max-width: 600px) {
         .blur-overlay-top {
@@ -82,10 +81,11 @@
   <body>
     <div class="video-wrapper" id="videoWrapper">
       <div class="blur-overlay blur-overlay-top" id="blurOverlayTop"></div>
-      <!-- <div
+      <div
         class="blur-overlay blur-overlay-bottom"
         id="blurOverlayBottom"
-      ></div> -->
+      ></div>
+
       <div id="player"></div>
     </div>
 

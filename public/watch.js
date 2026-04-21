@@ -25,6 +25,11 @@ let hideTimer = null;
 let lastTime = 0;
 let interactionTimer = null;
 
+// --- device check ---
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent);
+}
+
 // --- Blur control ---
 function showBlur() {
   if (hideTimer) {
@@ -33,7 +38,10 @@ function showBlur() {
   }
 
   overlay.classList.add("visible");
-  overlayBottom.classList.add("visible");
+
+  if (isAndroid() && overlayBottom) {
+    overlayBottom.classList.add("visible");
+  }
 }
 
 function scheduleHide() {
@@ -43,7 +51,11 @@ function scheduleHide() {
 
   hideTimer = setTimeout(() => {
     overlay.classList.remove("visible");
-    overlayBottom.classList.remove("visible");
+
+    if (isAndroid() && overlayBottom) {
+      overlayBottom.classList.remove("visible");
+    }
+
     hideTimer = null;
   }, 3500);
 }
