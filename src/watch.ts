@@ -16,10 +16,7 @@ let player: YT.Player;
 const overlayTop = document.getElementById("blurOverlayTop")!;
 const overlayBottom = document.getElementById("blurOverlayBottom")!;
 const wrapper = document.getElementById("videoWrapper")!;
-
-const playBtn = document.getElementById("playBtn")!;
-const pauseBtn = document.getElementById("pauseBtn")!;
-const volumeRange = document.getElementById("volumeRange") as HTMLInputElement;
+const tapCatcher = document.getElementById("tapCatcher")!;
 
 // ===== STATE =====
 let isPaused = false;
@@ -50,15 +47,38 @@ function scheduleHide(): void {
   }, 3000);
 }
 
+// ===== TAP (MAIN FIX) =====
+let tapTimeout: ReturnType<typeof setTimeout> | null = null;
+
+tapCatcher.addEventListener("touchstart", () => {
+  showBlur();
+  scheduleHide();
+
+  tapCatcher.style.pointerEvents = "none";
+
+  tapTimeout = setTimeout(() => {
+    tapCatcher.style.pointerEvents = "auto";
+  }, 300);
+});
+
+tapCatcher.addEventListener("click", () => {
+  showBlur();
+  scheduleHide();
+});
+
+// ===== DESKTOP =====
+wrapper.addEventListener("mouseenter", showBlur);
+wrapper.addEventListener("mouseleave", scheduleHide);
+
 // ===== YOUTUBE =====
 (window as any).onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
-    videoId: videoId!,
+    videoId,
     playerVars: {
       start: skipSeconds,
       autoplay: 1,
       mute: 1,
-      controls: 0,
+      controls: 1,
       rel: 0,
       modestbranding: 1,
       playsinline: 1,
@@ -72,34 +92,6 @@ function scheduleHide(): void {
 
 function onPlayerReady(event: YT.PlayerEvent) {
   event.target.playVideo();
-
-  playBtn.addEventListener("click", () => {
-    player.playVideo();
-    showBlur();
-    scheduleHide();
-  });
-
-  pauseBtn.addEventListener("click", () => {
-    player.pauseVideo();
-    showBlur();
-  });
-
-  volumeRange.addEventListener("input", () => {
-    player.setVolume(Number(volumeRange.value));
-  });
-
-  wrapper.addEventListener("click", () => {
-    const state = player.getPlayerState();
-
-    if (state === YT.PlayerState.PLAYING) {
-      player.pauseVideo();
-    } else {
-      player.playVideo();
-    }
-
-    showBlur();
-    scheduleHide();
-  });
 
   interactionTimer = setInterval(() => {
     if (!player || !player.getCurrentTime) return;
