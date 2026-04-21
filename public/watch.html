@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <title>Match Highlight</title>
+
     <style>
       body {
         margin: 0;
@@ -23,7 +24,6 @@
         overflow: hidden;
       }
 
-      /* Landscape: constrain by height so video fits without scrolling */
       @media (orientation: landscape) and (max-width: 1024px) {
         .video-wrapper {
           width: calc(100dvh * 16 / 9);
@@ -31,36 +31,30 @@
         }
       }
 
-      /* Cropped iframe */
       iframe {
         position: absolute;
-        /* top: -50px; */
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
         height: 100%;
         border: none;
       }
 
-      /* Shared blur styles */
+      /* ===== BLUR OVERLAYS ===== */
       .blur-overlay {
         position: absolute;
         z-index: 10;
-        pointer-events: all;
-        -webkit-user-select: none;
-        user-select: none;
+        pointer-events: none;
         background: rgba(0, 0, 0, 0.45);
-        -webkit-backdrop-filter: blur(10px);
         backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         opacity: 0;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.25s ease;
       }
 
       .blur-overlay.visible {
         opacity: 1;
       }
 
-      /* Top-left overlay */
       .blur-overlay-top {
         top: 0;
         left: 0;
@@ -68,7 +62,6 @@
         height: 20%;
       }
 
-      /* Bottom-right overlay */
       .blur-overlay-bottom {
         bottom: 0;
         right: 0;
@@ -81,15 +74,30 @@
           height: 15%;
         }
       }
+
+      /* ===== TAP CATCHER (KEY FIX) ===== */
+      .tap-catcher {
+        position: absolute;
+        inset: 0;
+        z-index: 20;
+        background: transparent;
+      }
     </style>
   </head>
+
   <body>
     <div class="video-wrapper" id="videoWrapper">
+      <!-- Blur UI -->
       <div class="blur-overlay blur-overlay-top" id="blurOverlayTop"></div>
       <div
         class="blur-overlay blur-overlay-bottom"
         id="blurOverlayBottom"
       ></div>
+
+      <!-- Tap catcher (IMPORTANT) -->
+      <div class="tap-catcher" id="tapCatcher"></div>
+
+      <!-- Player -->
       <div id="player"></div>
     </div>
 

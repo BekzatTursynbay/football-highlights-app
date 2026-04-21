@@ -13,55 +13,64 @@ if (!videoId) {
 
 let player: YT.Player;
 
-const overlay = document.getElementById("blurOverlayTop")!;
+const overlayTop = document.getElementById("blurOverlayTop")!;
 const overlayBottom = document.getElementById("blurOverlayBottom")!;
 const wrapper = document.getElementById("videoWrapper")!;
+const tapCatcher = document.getElementById("tapCatcher")!;
 
-// State
+// ===== STATE =====
 let isPaused = false;
 let hideTimer: ReturnType<typeof setTimeout> | null = null;
-
-// Track time to detect interaction
 let lastTime = 0;
 let interactionTimer: ReturnType<typeof setInterval> | null = null;
 
-// --- Blur control ---
+// ===== BLUR =====
 function showBlur(): void {
   if (hideTimer) {
     clearTimeout(hideTimer);
     hideTimer = null;
   }
-  overlay.classList.add("visible");
+
+  overlayTop.classList.add("visible");
   overlayBottom.classList.add("visible");
 }
 
 function scheduleHide(): void {
   if (isPaused) return;
+
   if (hideTimer) clearTimeout(hideTimer);
 
   hideTimer = setTimeout(() => {
-    overlay.classList.remove("visible");
+    overlayTop.classList.remove("visible");
     overlayBottom.classList.remove("visible");
     hideTimer = null;
-  }, 3500);
+  }, 3000);
 }
 
-// --- Desktop hover (still useful) ---
+// ===== TAP (MAIN FIX) =====
+let tapTimeout: ReturnType<typeof setTimeout> | null = null;
+
+tapCatcher.addEventListener("touchstart", () => {
+  showBlur();
+  scheduleHide();
+
+  tapCatcher.style.pointerEvents = "none";
+
+  tapTimeout = setTimeout(() => {
+    tapCatcher.style.pointerEvents = "auto";
+  }, 300);
+});
+
+tapCatcher.addEventListener("click", () => {
+  showBlur();
+  scheduleHide();
+});
+
+// ===== DESKTOP =====
 wrapper.addEventListener("mouseenter", showBlur);
 wrapper.addEventListener("mouseleave", scheduleHide);
 
-// --- Detect tap inside iframe on mobile ---
-window.addEventListener("blur", () => {
-  if (document.activeElement?.tagName === "IFRAME") {
-    console.log("clicked");
-    showBlur();
-    scheduleHide();
-    // Refocus window so the next tap triggers blur again
-    setTimeout(() => (document.activeElement as HTMLElement)?.blur(), 0);
-  }
-});
-
-// --- YouTube API ---
+// ===== YOUTUBE =====
 (window as any).onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
     videoId,
@@ -84,23 +93,20 @@ window.addEventListener("blur", () => {
 function onPlayerReady(event: YT.PlayerEvent) {
   event.target.playVideo();
 
-  // Start polling for interaction
   interactionTimer = setInterval(() => {
     if (!player || !player.getCurrentTime) return;
 
     const currentTime = player.getCurrentTime();
 
-    // Detect seek/jump interaction (not normal playback advancement)
     if (Math.abs(currentTime - lastTime) > 2) {
       showBlur();
       scheduleHide();
     }
 
     lastTime = currentTime;
-  }, 500); // check twice per second
+  }, 500);
 }
 
-// --- Player state ---
 function onPlayerStateChange(event: YT.OnStateChangeEvent): void {
   if (
     event.data === YT.PlayerState.PAUSED ||

@@ -1,102 +1,128 @@
 "use strict";
+
 function getQueryParam(name) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(name);
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
 }
+
 const videoId = getQueryParam("videoId");
 const skipSeconds = Number(getQueryParam("skip")) || 0;
+
 if (!videoId) {
-    document.body.innerHTML = "<h1 style='color:white'>No video</h1>";
-    throw new Error("Missing videoId");
+  document.body.innerHTML = "<h1 style='color:white'>No video</h1>";
+  throw new Error("Missing videoId");
 }
+
 let player;
-const overlay = document.getElementById("blurOverlayTop");
+
+const overlayTop = document.getElementById("blurOverlayTop");
 const overlayBottom = document.getElementById("blurOverlayBottom");
 const wrapper = document.getElementById("videoWrapper");
-// State
+const tapCatcher = document.getElementById("tapCatcher");
+
+// ===== STATE =====
 let isPaused = false;
 let hideTimer = null;
-// Track time to detect interaction
 let lastTime = 0;
 let interactionTimer = null;
-// --- Blur control ---
+
+// ===== BLUR CONTROL =====
 function showBlur() {
-    if (hideTimer) {
-        clearTimeout(hideTimer);
-        hideTimer = null;
-    }
-    overlay.classList.add("visible");
-    overlayBottom.classList.add("visible");
+  if (hideTimer) {
+    clearTimeout(hideTimer);
+    hideTimer = null;
+  }
+
+  overlayTop.classList.add("visible");
+  overlayBottom.classList.add("visible");
 }
+
 function scheduleHide() {
-    if (isPaused)
-        return;
-    if (hideTimer)
-        clearTimeout(hideTimer);
-    hideTimer = setTimeout(() => {
-        overlay.classList.remove("visible");
-        overlayBottom.classList.remove("visible");
-        hideTimer = null;
-    }, 3500);
+  if (isPaused) return;
+
+  if (hideTimer) clearTimeout(hideTimer);
+
+  hideTimer = setTimeout(() => {
+    overlayTop.classList.remove("visible");
+    overlayBottom.classList.remove("visible");
+    hideTimer = null;
+  }, 3000);
 }
-// --- Desktop hover (still useful) ---
+
+// ===== TAP HANDLING (FIX FOR iOS) =====
+let tapTimeout = null;
+
+tapCatcher.addEventListener("touchstart", () => {
+  showBlur();
+  scheduleHide();
+
+  // allow click to pass through
+  tapCatcher.style.pointerEvents = "none";
+
+  tapTimeout = setTimeout(() => {
+    tapCatcher.style.pointerEvents = "auto";
+  }, 300);
+});
+
+// Also support desktop click
+tapCatcher.addEventListener("click", () => {
+  showBlur();
+  scheduleHide();
+});
+
+// ===== DESKTOP HOVER =====
 wrapper.addEventListener("mouseenter", showBlur);
 wrapper.addEventListener("mouseleave", scheduleHide);
 
-// --- Detect tap inside iframe on mobile ---
-window.addEventListener("blur", () => {
-    if (document.activeElement && document.activeElement.tagName === "IFRAME") {
-        console.log("clicked");
-        showBlur();
-        scheduleHide();
-        // Refocus window so the next tap triggers blur again
-        setTimeout(() => document.activeElement && document.activeElement.blur(), 0);
-    }
-});
-// --- YouTube API ---
+// ===== YOUTUBE API =====
 window.onYouTubeIframeAPIReady = () => {
-    player = new YT.Player("player", {
-        videoId,
-        playerVars: {
-            start: skipSeconds,
-            autoplay: 1,
-            mute: 1,
-            controls: 1,
-            rel: 0,
-            modestbranding: 1,
-            playsinline: 1,
-        },
-        events: {
-            onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange,
-        },
-    });
+  player = new YT.Player("player", {
+    videoId,
+    playerVars: {
+      start: skipSeconds,
+      autoplay: 1,
+      mute: 1,
+      controls: 1,
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+    },
+  });
 };
+
 function onPlayerReady(event) {
-    event.target.playVideo();
-    // Start polling for interaction
-    interactionTimer = setInterval(() => {
-        if (!player || !player.getCurrentTime)
-            return;
-        const currentTime = player.getCurrentTime();
-        // Detect seek/jump interaction (not normal playback advancement)
-        if (Math.abs(currentTime - lastTime) > 2) {
-            showBlur();
-            scheduleHide();
-        }
-        lastTime = currentTime;
-    }, 500); // check twice per second
+  event.target.playVideo();
+
+  interactionTimer = setInterval(() => {
+    if (!player || !player.getCurrentTime) return;
+
+    const currentTime = player.getCurrentTime();
+
+    // detect seek/jump
+    if (Math.abs(currentTime - lastTime) > 2) {
+      showBlur();
+      scheduleHide();
+    }
+
+    lastTime = currentTime;
+  }, 500);
 }
-// --- Player state ---
+
+// ===== PLAYER STATE =====
 function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PAUSED ||
-        event.data === YT.PlayerState.ENDED) {
-        isPaused = true;
-        showBlur();
-    }
-    else if (event.data === YT.PlayerState.PLAYING) {
-        isPaused = false;
-        showBlur();
-        scheduleHide();
-    }
+  if (
+    event.data === YT.PlayerState.PAUSED ||
+    event.data === YT.PlayerState.ENDED
+  ) {
+    isPaused = true;
+    showBlur();
+  } else if (event.data === YT.PlayerState.PLAYING) {
+    isPaused = false;
+    showBlur();
+    scheduleHide();
+  }
 }
