@@ -18,7 +18,10 @@ let player;
 const overlayTop = document.getElementById("blurOverlayTop");
 const overlayBottom = document.getElementById("blurOverlayBottom");
 const wrapper = document.getElementById("videoWrapper");
-const tapCatcher = document.getElementById("tapCatcher");
+
+const playBtn = document.getElementById("playBtn");
+const pauseBtn = document.getElementById("pauseBtn");
+const volumeRange = document.getElementById("volumeRange");
 
 // ===== STATE =====
 let isPaused = false;
@@ -26,7 +29,7 @@ let hideTimer = null;
 let lastTime = 0;
 let interactionTimer = null;
 
-// ===== BLUR CONTROL =====
+// ===== BLUR =====
 function showBlur() {
   if (hideTimer) {
     clearTimeout(hideTimer);
@@ -49,32 +52,7 @@ function scheduleHide() {
   }, 3000);
 }
 
-// ===== TAP HANDLING (FIX FOR iOS) =====
-let tapTimeout = null;
-
-tapCatcher.addEventListener("touchstart", () => {
-  showBlur();
-  scheduleHide();
-
-  // allow click to pass through
-  tapCatcher.style.pointerEvents = "none";
-
-  tapTimeout = setTimeout(() => {
-    tapCatcher.style.pointerEvents = "auto";
-  }, 300);
-});
-
-// Also support desktop click
-tapCatcher.addEventListener("click", () => {
-  showBlur();
-  scheduleHide();
-});
-
-// ===== DESKTOP HOVER =====
-wrapper.addEventListener("mouseenter", showBlur);
-wrapper.addEventListener("mouseleave", scheduleHide);
-
-// ===== YOUTUBE API =====
+// ===== YOUTUBE =====
 window.onYouTubeIframeAPIReady = () => {
   player = new YT.Player("player", {
     videoId,
@@ -82,7 +60,7 @@ window.onYouTubeIframeAPIReady = () => {
       start: skipSeconds,
       autoplay: 1,
       mute: 1,
-      controls: 1,
+      controls: 0,
       rel: 0,
       modestbranding: 1,
       playsinline: 1,
@@ -97,12 +75,40 @@ window.onYouTubeIframeAPIReady = () => {
 function onPlayerReady(event) {
   event.target.playVideo();
 
+  playBtn.addEventListener("click", () => {
+    player.playVideo();
+    showBlur();
+    scheduleHide();
+  });
+
+  pauseBtn.addEventListener("click", () => {
+    player.pauseVideo();
+    showBlur();
+  });
+
+  volumeRange.addEventListener("input", (e) => {
+    player.setVolume(e.target.value);
+  });
+
+  // Tap anywhere to toggle play (mobile friendly)
+  wrapper.addEventListener("click", () => {
+    const state = player.getPlayerState();
+
+    if (state === YT.PlayerState.PLAYING) {
+      player.pauseVideo();
+    } else {
+      player.playVideo();
+    }
+
+    showBlur();
+    scheduleHide();
+  });
+
   interactionTimer = setInterval(() => {
     if (!player || !player.getCurrentTime) return;
 
     const currentTime = player.getCurrentTime();
 
-    // detect seek/jump
     if (Math.abs(currentTime - lastTime) > 2) {
       showBlur();
       scheduleHide();
@@ -112,7 +118,7 @@ function onPlayerReady(event) {
   }, 500);
 }
 
-// ===== PLAYER STATE =====
+// ===== STATE =====
 function onPlayerStateChange(event) {
   if (
     event.data === YT.PlayerState.PAUSED ||
