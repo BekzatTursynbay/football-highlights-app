@@ -30,6 +30,11 @@ function isAndroid(): boolean {
   return /Android/i.test(navigator.userAgent);
 }
 
+// 🔥 HARD DISABLE on non-Android
+if (!isAndroid() && overlayBottom) {
+  overlayBottom.style.display = "none";
+}
+
 // --- Blur control ---
 function showBlur(): void {
   if (hideTimer) {
@@ -38,10 +43,7 @@ function showBlur(): void {
   }
 
   overlay.classList.add("visible");
-
-  if (isAndroid() && overlayBottom) {
-    overlayBottom.classList.add("visible");
-  }
+  overlayBottom?.classList.add("visible");
 }
 
 function scheduleHide(): void {
@@ -51,11 +53,7 @@ function scheduleHide(): void {
 
   hideTimer = setTimeout(() => {
     overlay.classList.remove("visible");
-
-    if (isAndroid() && overlayBottom) {
-      overlayBottom.classList.remove("visible");
-    }
-
+    overlayBottom?.classList.remove("visible");
     hideTimer = null;
   }, 3500);
 }
@@ -67,7 +65,6 @@ wrapper.addEventListener("mouseleave", scheduleHide);
 // iOS iframe blur detection
 window.addEventListener("blur", () => {
   if (document.activeElement?.tagName === "IFRAME") {
-    console.log("clicked");
     showBlur();
     scheduleHide();
 
