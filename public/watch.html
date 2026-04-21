@@ -3,7 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Match Highlight</title>
-
     <style>
       body {
         margin: 0;
@@ -14,7 +13,6 @@
         height: 100dvh;
         overflow: hidden;
       }
-
       .video-wrapper {
         position: relative;
         width: 100vw;
@@ -22,85 +20,64 @@
         aspect-ratio: 16 / 9;
         background: black;
         overflow: hidden;
-      }
-
+      } /* Landscape: constrain by height so video fits without scrolling */
       @media (orientation: landscape) and (max-width: 1024px) {
         .video-wrapper {
           width: calc(100dvh * 16 / 9);
           max-width: 100vw;
         }
-      }
-
+      } /* Cropped iframe */
       iframe {
-        position: absolute;
-        inset: 0;
+        position: absolute; /* top: -50px; */
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         border: none;
-      }
-
-      /* ===== BLUR OVERLAYS ===== */
+      } /* Shared blur styles */
       .blur-overlay {
         position: absolute;
         z-index: 10;
-        pointer-events: none;
+        pointer-events: all;
+        -webkit-user-select: none;
+        user-select: none;
         background: rgba(0, 0, 0, 0.45);
-        backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
         opacity: 0;
-        transition: opacity 0.25s ease;
+        transition: opacity 0.3s ease;
       }
-
       .blur-overlay.visible {
         opacity: 1;
-      }
-
+      } /* Top-left overlay */
       .blur-overlay-top {
         top: 0;
         left: 0;
         width: 70%;
         height: 20%;
-      }
-
-      .blur-overlay-bottom {
+      } /* Bottom-right overlay */
+      /* .blur-overlay-bottom {
         bottom: 0;
         right: 0;
         width: 40%;
         height: 40%;
-      }
-
+      } */
       @media (max-width: 600px) {
         .blur-overlay-top {
           height: 15%;
         }
       }
-
-      /* ===== TAP CATCHER (KEY FIX) ===== */
-      .tap-catcher {
-        position: absolute;
-        inset: 0;
-        z-index: 20;
-        background: transparent;
-      }
     </style>
   </head>
-
   <body>
     <div class="video-wrapper" id="videoWrapper">
-      <!-- Blur UI -->
       <div class="blur-overlay blur-overlay-top" id="blurOverlayTop"></div>
-      <div
+      <!-- <div
         class="blur-overlay blur-overlay-bottom"
         id="blurOverlayBottom"
-      ></div>
-
-      <!-- Tap catcher (IMPORTANT) -->
-      <div class="tap-catcher" id="tapCatcher"></div>
-
-      <!-- Player -->
+      ></div> -->
       <div id="player"></div>
     </div>
-
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="watch.js"></script>
   </body>
