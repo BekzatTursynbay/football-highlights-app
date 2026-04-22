@@ -109,12 +109,16 @@ async function run() {
 }
 
 // Schedule the highlight sending at 14:20 KZ = 09:20 UTC
-cron.schedule("12 04 * * *", () => {
-  run().catch(console.error);
-});
-// cron.schedule("0 9 * * *", () => {
+// cron.schedule("12 04 * * *", () => {
 //   run().catch(console.error);
-// }, {
-//   timezone: "Asia/Aqtobe"
 // });
+cron.schedule(
+  "0 9 * * *",
+  () => {
+    run().catch(console.error);
+  },
+  {
+    timezone: "Asia/Aqtobe",
+  },
+);
 // run().catch(console.error);
