@@ -112,13 +112,13 @@ async function run() {
 // cron.schedule("12 04 * * *", () => {
 //   run().catch(console.error);
 // });
-cron.schedule(
-  "0 9 * * *",
-  () => {
-    run().catch(console.error);
-  },
-  {
-    timezone: "Asia/Aqtobe",
-  },
-);
-// run().catch(console.error);
+// cron.schedule(
+//   "0 9 * * *",
+//   () => {
+//     run().catch(console.error);
+//   },
+//   {
+//     timezone: "Asia/Aqtobe",
+//   },
+// );
+run().catch(console.error);
