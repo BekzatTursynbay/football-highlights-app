@@ -7,7 +7,7 @@
     <style>
       body {
         margin: 0;
-        background: #754040;
+        background: #e8f5e9;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -75,6 +75,76 @@
           height: 15%;
         }
       }
+
+      /* Mascot */
+      .mascot {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        z-index: 100;
+        user-select: none;
+      }
+
+      .mascot-bubble {
+        background: rgba(255, 255, 255, 0.85);
+        color: #1b3a10;
+        font-family: system-ui, sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        line-height: 1.4;
+        padding: 14px 20px;
+        border-radius: 14px 14px 14px 4px;
+        max-width: 300px;
+        text-align: center;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        animation: fadeMsg 0.5s ease;
+      }
+
+      @keyframes fadeMsg {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .mascot-avatar {
+        width: 360px;
+        height: auto;
+        animation: bounce 2.4s ease-in-out infinite;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+      }
+
+      @keyframes bounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      @media (max-width: 600px) {
+        .mascot {
+          bottom: 12px;
+          left: 12px;
+        }
+        .mascot-avatar {
+          width: 220px;
+        }
+        .mascot-bubble {
+          font-size: 15px;
+          max-width: 220px;
+        }
+      }
     </style>
   </head>
 
@@ -87,6 +157,10 @@
       ></div>
 
       <div id="player"></div>
+    </div>
+
+    <div class="mascot">
+      <img class="mascot-avatar" src="actor.png" alt="mascot" />
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
