@@ -80,10 +80,16 @@ export async function runHighlights() {
   });
 
   const BASE_URL = process.env.BASE_URL;
-  const links = playable.map(
-    (h) =>
-      `• <a href="${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
-  );
+
+  const LEAGUE_LABELS: Record<string, string> = {
+    EPL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 АПЛ",
+    LaLiga: "🇪🇸 Ла Лига",
+    SuperLig: "🇹🇷 Турецкая Суперлига",
+    ChampionsLeague: "🏆 Лига Чемпионов",
+    EuropaLeague: "🟠 Лига Европы",
+    SerieA: "🇮🇹 Серия А",
+    Bundesliga: "🇩🇪 Бундеслига",
+  };
 
   // Log clickable links in terminal
   if (playable.length) {
@@ -96,9 +102,27 @@ export async function runHighlights() {
     console.log("No highlights found for yesterday night.");
   }
 
-  const message = links.length
-    ? `⚽️ Football Highlights:\n\n${links.join("\n")}`
-    : "No highlights found for yesterday night.";
+  let message: string;
+  if (playable.length === 0) {
+    message = "Обзоры матчей за прошлую ночь не найдены.";
+  } else {
+    const grouped = new Map<string, string[]>();
+    for (const h of playable) {
+      const label = LEAGUE_LABELS[h.league] ?? h.league;
+      if (!grouped.has(label)) grouped.set(label, []);
+      grouped
+        .get(label)!
+        .push(
+          `  • <a href="${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
+        );
+    }
+
+    const sections = [...grouped.entries()].map(
+      ([label, items]) => `${label}\n${items.join("\n")}`,
+    );
+
+    message = `⚽️ <b>Обзоры матчей</b>\n\n${sections.join("\n\n")}`;
+  }
 
   // Send to Telegram
   const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
