@@ -41,7 +41,7 @@ function filterByTimeWindow(highlight: Highlight, start: Date, end: Date) {
   return highlight.publishedAt >= start && highlight.publishedAt <= end;
 }
 
-async function run() {
+export async function runHighlights() {
   const { nightStart, nightEnd } = getNightTimeWindow({ testMode: false });
 
   let highlights: Highlight[] = [];
@@ -121,4 +121,4 @@ async function run() {
 //     timezone: "Asia/Aqtobe",
 //   },
 // );
-run().catch(console.error);
+// Triggered externally via GitHub Actions → POST /run

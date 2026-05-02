@@ -1,0 +1,23 @@
+name: Send Football Highlights
+
+on:
+  schedule:
+    # 09:00 Asia/Aqtobe = 04:00 UTC
+    - cron: "0 4 * * *"
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  trigger:
+    name: Trigger highlights run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call /run endpoint
+        run: |
+          response=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.APP_URL }}/run" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}")
+          echo "Response status: $response"
+          if [ "$response" != "200" ]; then
+            echo "Unexpected response: $response"
+            exit 1
+          fi
