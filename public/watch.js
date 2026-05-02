@@ -57,7 +57,7 @@ function scheduleHide() {
     overlay.classList.remove("visible");
     overlayBottom?.classList.remove("visible");
     hideTimer = null;
-  }, 3500);
+  }, 4000);
 }
 
 // Desktop hover
@@ -70,9 +70,11 @@ window.addEventListener("blur", () => {
     showBlur();
     scheduleHide();
 
+    // Restore window focus after a short delay so the next iframe tap
+    // fires window.blur again (fixes inconsistent detection on iOS).
     setTimeout(() => {
-      document.activeElement?.blur();
-    }, 0);
+      window.focus();
+    }, 300);
   }
 });
 
