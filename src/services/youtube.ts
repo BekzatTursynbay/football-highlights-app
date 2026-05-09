@@ -5,19 +5,24 @@ dotenv.config();
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 
-if (!YOUTUBE_API_KEY) {
-  throw new Error("YOUTUBE_API_KEY is missing in environment variables");
+function getYoutubeApiKey(): string {
+  if (!YOUTUBE_API_KEY) {
+    throw new Error("Missing required environment variable: YOUTUBE_API_KEY");
+  }
+  return YOUTUBE_API_KEY;
 }
 
 const YT_BASE = "https://www.googleapis.com/youtube/v3";
 
 export async function fetchPlaylistVideos(playlistId: string) {
+  const apiKey = getYoutubeApiKey();
+
   const response = await axios.get(`${YT_BASE}/playlistItems`, {
     params: {
       part: "snippet",
       maxResults: 50,
       playlistId: playlistId,
-      key: YOUTUBE_API_KEY,
+      key: apiKey,
     },
   });
 
@@ -27,11 +32,13 @@ export async function fetchPlaylistVideos(playlistId: string) {
 export async function fetchVideoDetails(videoIds: string[]) {
   if (videoIds.length === 0) return [];
 
+  const apiKey = getYoutubeApiKey();
+
   const response = await axios.get(`${YT_BASE}/videos`, {
     params: {
       part: "status,contentDetails",
       id: videoIds.join(","),
-      key: YOUTUBE_API_KEY,
+      key: apiKey,
     },
   });
 

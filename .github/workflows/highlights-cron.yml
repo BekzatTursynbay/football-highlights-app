@@ -13,10 +13,12 @@ jobs:
     steps:
       - name: Call /run endpoint
         run: |
-          response=$(curl -s -o /dev/null -w "%{http_code}" \
+          response=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
             -X POST "${{ secrets.APP_URL }}/run" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}")
           echo "Response status: $response"
+          echo "Response body:"
+          cat /tmp/resp.txt
           if [ "$response" != "200" ]; then
             echo "Unexpected response: $response"
             exit 1

@@ -13,21 +13,38 @@ app.get("/", (req, res) => {
 });
 
 // Protected endpoint triggered by GitHub Actions cron
-app.post("/run", (req, res) => {
-  const token = req.headers["x-cron-secret"];
-  if (!token || token !== process.env.CRON_SECRET) {
+app.post("/run", async (req, res) => {
+  const cronSecret = process.env.CRON_SECRET;
+  if (!cronSecret) {
+    console.error("POST /run failed: missing CRON_SECRET");
+    res.status(500).json({ error: "Server misconfiguration: missing CRON_SECRET" });
+    return;
+  }
+
+  const headerToken = req.headers["x-cron-secret"];
+  const token = Array.isArray(headerToken) ? headerToken[0] : headerToken;
+
+  if (!token || token !== cronSecret) {
     res.status(401).json({ error: "Unauthorized" });
     return;
   }
 
-  // Import here to avoid circular dependency
-  const { runHighlights } = require("./index");
-  runHighlights()
-    .then(() => res.json({ ok: true }))
-    .catch((err: Error) => {
-      console.error("Error in /run:", err);
-      res.status(500).json({ error: err.message });
+  try {
+    // Import here to avoid circular dependency
+    const { runHighlights } = require("./index") as {
+      runHighlights: () => Promise<void>;
+    };
+
+    await runHighlights();
+    res.json({ ok: true });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    console.error("POST /run failed:", err);
+    res.status(500).json({
+      error: "Internal server error",
+      message,
     });
+  }
 });
 
 app.listen(PORT, () => {

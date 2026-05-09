@@ -41,7 +41,19 @@ function filterByTimeWindow(highlight: Highlight, start: Date, end: Date) {
   return highlight.publishedAt >= start && highlight.publishedAt <= end;
 }
 
+function getRequiredEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+  return value;
+}
+
 export async function runHighlights() {
+  const BASE_URL = getRequiredEnv("BASE_URL");
+  const TELEGRAM_BOT_TOKEN = getRequiredEnv("TELEGRAM_BOT_TOKEN");
+  const TELEGRAM_CHAT_ID = getRequiredEnv("TELEGRAM_CHAT_ID");
+
   const { nightStart, nightEnd } = getNightTimeWindow({ testMode: false });
 
   let highlights: Highlight[] = [];
@@ -78,8 +90,6 @@ export async function runHighlights() {
     const detail = detailsMap.get(h.videoId);
     return detail && isPlayableInIframe(detail, "KZ");
   });
-
-  const BASE_URL = process.env.BASE_URL;
 
   const LEAGUE_LABELS: Record<string, string> = {
     EPL: "🏴󠁧󠁢󠁥󠁮󠁧󠁿 АПЛ",
@@ -125,8 +135,6 @@ export async function runHighlights() {
   }
 
   // Send to Telegram
-  const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-  const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID!;
   await sendTelegramMessage(TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, message);
 
   console.log(nightStart, nightEnd);
