@@ -49,6 +49,15 @@ function getRequiredEnv(name: string): string {
   return value;
 }
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function runHighlights() {
   const BASE_URL = getRequiredEnv("BASE_URL");
   const TELEGRAM_BOT_TOKEN = getRequiredEnv("TELEGRAM_BOT_TOKEN");
@@ -120,11 +129,14 @@ export async function runHighlights() {
     for (const h of playable) {
       const label = LEAGUE_LABELS[h.league] ?? h.league;
       if (!grouped.has(label)) grouped.set(label, []);
+      const safeUrl = `${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}`.replace(
+        /&/g,
+        "&amp;",
+      );
+      const safeTitle = escapeHtml(h.title);
       grouped
         .get(label)!
-        .push(
-          `  • <a href="${BASE_URL}/watch.html?videoId=${h.videoId}&skip=${h.skipSeconds}">${h.title}</a>`,
-        );
+        .push(`  • <a href="${safeUrl}">${safeTitle}</a>`);
     }
 
     const sections = [...grouped.entries()].map(
