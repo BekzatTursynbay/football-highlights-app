@@ -15,12 +15,24 @@ export async function sendTelegramMessage(
     });
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
+      const status = err.response?.status;
+      const data = err.response?.data as
+        | { description?: string; error_code?: number }
+        | undefined;
+      const description = data?.description;
+
       console.error("Telegram API error:", {
-        status: err.response?.status,
+        status,
         statusText: err.response?.statusText,
-        data: err.response?.data,
+        data,
         message: err.message,
       });
+
+      if (status) {
+        throw new Error(
+          `Telegram API ${status}${description ? `: ${description}` : ""}`,
+        );
+      }
     }
     throw err;
   }

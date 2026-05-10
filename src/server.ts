@@ -39,7 +39,7 @@ app.post("/run", async (req, res) => {
     res.json({ ok: true });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
-    console.error("POST /run failed:", err);
+    console.error("POST /run failed:", message);
     res.status(500).json({
       error: "Internal server error",
       message,
