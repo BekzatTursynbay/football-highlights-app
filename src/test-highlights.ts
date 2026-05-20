@@ -1,7 +1,9 @@
 import "dotenv/config";
 import { runHighlights } from "./index";
 
-runHighlights()
+const manualMode = process.argv.includes("--manual");
+
+runHighlights({ manualMode })
   .then(() => {
     console.log("✅ Test completed successfully");
     process.exit(0);

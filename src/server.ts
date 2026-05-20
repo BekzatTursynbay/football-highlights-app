@@ -32,11 +32,12 @@ app.post("/run", async (req, res) => {
   try {
     // Import here to avoid circular dependency
     const { runHighlights } = require("./index") as {
-      runHighlights: () => Promise<void>;
+      runHighlights: (opts?: { manualMode?: boolean }) => Promise<void>;
     };
 
-    await runHighlights();
-    res.json({ ok: true });
+    const manualMode = req.query["manual"] === "true";
+    await runHighlights({ manualMode });
+    res.json({ ok: true, manualMode });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     console.error("POST /run failed:", message);

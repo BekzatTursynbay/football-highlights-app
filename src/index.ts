@@ -58,12 +58,13 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export async function runHighlights() {
+export async function runHighlights({ manualMode = false } = {}) {
   const BASE_URL = getRequiredEnv("BASE_URL");
   const TELEGRAM_BOT_TOKEN = getRequiredEnv("TELEGRAM_BOT_TOKEN");
   const TELEGRAM_CHAT_ID = getRequiredEnv("TELEGRAM_CHAT_ID");
 
-  const { nightStart, nightEnd } = getNightTimeWindow({ testMode: false });
+  const { nightStart, nightEnd } = getNightTimeWindow({ testMode: false, manualMode });
+  console.log(`Mode: ${manualMode ? "MANUAL" : "scheduled"} | Window: ${nightStart.toISOString()} -> ${nightEnd.toISOString()}`);
 
   let highlights: Highlight[] = [];
 

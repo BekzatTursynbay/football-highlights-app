@@ -4,7 +4,16 @@ on:
   schedule:
     # 09:00 Asia/Aqtobe = 04:00 UTC
     - cron: "0 0 * * *"
-  workflow_dispatch: # allow manual trigger
+  workflow_dispatch:
+    inputs:
+      manual:
+        description: "Run in manual mode (includes highlights up to now)"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 jobs:
   trigger:
@@ -13,8 +22,13 @@ jobs:
     steps:
       - name: Call /run endpoint
         run: |
+          MANUAL_FLAG="${{ github.event.inputs.manual || 'false' }}"
+          URL="${{ secrets.APP_URL }}/run"
+          if [ "$MANUAL_FLAG" = "true" ]; then
+            URL="${URL}?manual=true"
+          fi
           response=$(curl -s -o /tmp/resp.txt -w "%{http_code}" \
-            -X POST "${{ secrets.APP_URL }}/run" \
+            -X POST "$URL" \
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}")
           echo "Response status: $response"
           echo "Response body:"
